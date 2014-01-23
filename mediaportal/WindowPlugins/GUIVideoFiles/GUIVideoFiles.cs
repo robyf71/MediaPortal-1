@@ -1599,14 +1599,13 @@ namespace MediaPortal.GUI.Video
           if (Util.Utils.FileExistsInCache(item.Path))
           {
             string strThumbPath = Util.Utils.GetVideosThumbPathname(item.Path);
-            
+
             bool success = Util.VideoThumbCreator.CreateVideoThumb(item.Path, strThumbPath, true, true);
             if (success)
             {
               Log.Debug("Refresh success!");
               if (facadeLayout.ListLayout.ListItems.Count > 0 && !string.IsNullOrEmpty(_currentFolder))
               {
-                Util.Utils.SetThumbnails(ref item);
                 selectedIndex = facadeLayout.SelectedListItemIndex;
                 LoadDirectory(_currentFolder, false);
                 facadeLayout.SelectedListItemIndex = selectedIndex;
@@ -1616,7 +1615,7 @@ namespace MediaPortal.GUI.Video
           break;
         case 1995: // Create 4x4 folder.jpg
           Log.Debug("Create folder.jpg from context menu: {0}", item.Path);
-          CreateFolderThumb(item.Path, true);
+          CreateFolderThumb(item, true);
           break;
         case 1264: // Get media info (refresh mediainfo and duration)
           if (item != null)
@@ -4324,11 +4323,11 @@ namespace MediaPortal.GUI.Video
       }
     }
 
-    private void CreateFolderThumb(string path, bool recreateAll)
+    private void CreateFolderThumb(GUIListItem item, bool recreateAll)
     {
       // find first 4 jpegs in this subfolder
 
-      List<GUIListItem> itemlist = _virtualDirectory.GetDirectoryUnProtectedExt(path, true);
+      List<GUIListItem> itemlist = _virtualDirectory.GetDirectoryUnProtectedExt(item.Path, true);
 
       if (!recreateAll)
       {
@@ -4352,7 +4351,6 @@ namespace MediaPortal.GUI.Video
             string thumbStr = s;
             if (Util.Utils.FileExistsInCache(thumbStr))
             {
-              Log.Debug("regeszter {0}", thumbStr);
               pictureList.Add(thumbStr);
               break;
             }
@@ -4365,9 +4363,7 @@ namespace MediaPortal.GUI.Video
       }
       // combine those 4 image files into one folder.jpg
 
-      string filePath = Path.Combine(path, @"Folder.jpg");
-
-      Util.Utils.FileDelete(filePath);
+      string filePath = Path.Combine(item.Path, @"Folder.jpg");
 
       if (pictureList.Count == 1)
       {
@@ -4380,12 +4376,15 @@ namespace MediaPortal.GUI.Video
           Log.Error("CreateFolderThumb:: unable to create {0}", filePath);
         }
       }
-      else if (pictureList.Count > 0 && Util.Utils.CreateFolderPreviewThumb(pictureList, filePath, false))
+      else if (pictureList.Count > 1)
       {
-        int selectedIndex = facadeLayout.SelectedListItemIndex;
-        LoadDirectory(_currentFolder, false);
-        facadeLayout.SelectedListItemIndex = selectedIndex;
+        Util.Utils.FileDelete(filePath);
+        Util.Utils.CreateFolderPreviewThumb(pictureList, filePath, false);
       }
+
+      int selectedIndex = facadeLayout.SelectedListItemIndex;
+      LoadDirectory(_currentFolder, false);
+      facadeLayout.SelectedListItemIndex = selectedIndex;
     }
 
     private static void Filter(ref List<GUIListItem> itemlist)
