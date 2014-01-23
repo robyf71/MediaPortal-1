@@ -1322,6 +1322,11 @@ namespace MediaPortal.GUI.Video
         dlg.AddLocalizedString(1984); // Refresh thumb
       }
 
+      if (item.IsFolder && item.Label != "..")
+      {
+        dlg.AddLocalizedString(1995); // Create 4x4 folder.jpg
+      }
+
       dlg.DoModal(GetID);
 
       if (dlg.SelectedId == -1)
@@ -1594,20 +1599,24 @@ namespace MediaPortal.GUI.Video
           if (Util.Utils.FileExistsInCache(item.Path))
           {
             string strThumbPath = Util.Utils.GetVideosThumbPathname(item.Path);
-            Util.Utils.SetThumbnails(ref item);
+            
             bool success = Util.VideoThumbCreator.CreateVideoThumb(item.Path, strThumbPath, true, true);
             if (success)
             {
               Log.Debug("Refresh success!");
               if (facadeLayout.ListLayout.ListItems.Count > 0 && !string.IsNullOrEmpty(_currentFolder))
               {
+                Util.Utils.SetThumbnails(ref item);
                 selectedIndex = facadeLayout.SelectedListItemIndex;
                 LoadDirectory(_currentFolder, false);
                 facadeLayout.SelectedListItemIndex = selectedIndex;
               }
             }
           }
-
+          break;
+        case 1995: // Create 4x4 folder.jpg
+          Log.Debug("Create folder.jpg from context menu: {0}", item.Path);
+          CreateFolderThumb(item.Path, true);
           break;
         case 1264: // Get media info (refresh mediainfo and duration)
           if (item != null)
@@ -4312,6 +4321,87 @@ namespace MediaPortal.GUI.Video
       if (facadeLayout != null)
       {
         facadeLayout.Clear();
+      }
+    }
+
+    private void CreateFolderThumb(string path, bool recreateAll)
+    {
+      // find first 4 jpegs in this subfolder
+
+      List<GUIListItem> itemlist = _virtualDirectory.GetDirectoryUnProtectedExt(path, true);
+
+      if (!recreateAll)
+      {
+        Filter(ref itemlist);
+      }
+
+      List<string> pictureList = new List<string>();
+      foreach (GUIListItem subitem in itemlist)
+      {
+        if (!subitem.IsFolder)
+        {
+          string[] thumbs = {
+                            Util.Utils.GetVideosLargeThumbPathname(subitem.Path),
+                            Path.ChangeExtension(subitem.Path, ".jpg"),
+                            Path.ChangeExtension(subitem.Path, ".tbn"),
+                            Path.ChangeExtension(subitem.Path, ".png")
+                          };
+
+          foreach (string s in thumbs)
+          {
+            string thumbStr = s;
+            if (Util.Utils.FileExistsInCache(thumbStr))
+            {
+              Log.Debug("regeszter {0}", thumbStr);
+              pictureList.Add(thumbStr);
+              break;
+            }
+          }
+        }
+        if (pictureList.Count >= 4)
+        {
+          break;
+        }
+      }
+      // combine those 4 image files into one folder.jpg
+
+      string filePath = Path.Combine(path, @"Folder.jpg");
+
+      Util.Utils.FileDelete(filePath);
+
+      if (pictureList.Count == 1)
+      {
+        try
+        {
+          File.Copy(pictureList[0], filePath, true);
+        }
+        catch 
+        {
+          Log.Error("CreateFolderThumb:: unable to create {0}", filePath);
+        }
+      }
+      else if (pictureList.Count > 0 && Util.Utils.CreateFolderPreviewThumb(pictureList, filePath, false))
+      {
+        int selectedIndex = facadeLayout.SelectedListItemIndex;
+        LoadDirectory(_currentFolder, false);
+        facadeLayout.SelectedListItemIndex = selectedIndex;
+      }
+    }
+
+    private static void Filter(ref List<GUIListItem> itemlist)
+    {
+      itemlist.RemoveAll(ContainsFolderThumb);
+    }
+
+    private static bool ContainsFolderThumb(GUIListItem aItem)
+    {
+      if (!aItem.IsFolder && aItem.Path.Contains(@"folder.jpg"))
+      {
+        return true;
+      }
+      else
+      {
+        return false;
       }
     }
 
