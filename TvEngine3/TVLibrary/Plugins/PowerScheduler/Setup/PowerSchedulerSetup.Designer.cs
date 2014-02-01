@@ -65,7 +65,6 @@ namespace PowerScheduler.Setup
       this.buttonExpertMode = new System.Windows.Forms.Button();
       this.numericUpDownIdleTimeout = new System.Windows.Forms.NumericUpDown();
       this.checkBoxHomeOnly = new System.Windows.Forms.CheckBox();
-      this.checkBoxUmuteMasterVolume = new System.Windows.Forms.CheckBox();
       this.groupBoxProcesses = new System.Windows.Forms.GroupBox();
       this.groupBoxEPG = new System.Windows.Forms.GroupBox();
       this.flowLayoutPanelEPG = new System.Windows.Forms.FlowLayoutPanel();
@@ -632,20 +631,6 @@ namespace PowerScheduler.Setup
       this.toolTip.SetToolTip(this.checkBoxHomeOnly, "Prevents standby while the MP client is not on home window");
       this.checkBoxHomeOnly.UseVisualStyleBackColor = true;
       this.checkBoxHomeOnly.CheckedChanged += new System.EventHandler(this.buttonApply_Enable);
-      // 
-      // checkBoxUmuteMasterVolume
-      // 
-      this.checkBoxUmuteMasterVolume.AutoSize = true;
-      this.checkBoxUmuteMasterVolume.Checked = true;
-      this.checkBoxUmuteMasterVolume.CheckState = System.Windows.Forms.CheckState.Checked;
-      this.checkBoxUmuteMasterVolume.Location = new System.Drawing.Point(12, 104);
-      this.checkBoxUmuteMasterVolume.Name = "checkBoxUmuteMasterVolume";
-      this.checkBoxUmuteMasterVolume.Size = new System.Drawing.Size(302, 17);
-      this.checkBoxUmuteMasterVolume.TabIndex = 3;
-      this.checkBoxUmuteMasterVolume.Text = "Unmute master volume on start and on leaving away mode";
-      this.toolTip.SetToolTip(this.checkBoxUmuteMasterVolume, "Unmutes master volume if muted wrongly (e.g. after leaving away mode)");
-      this.checkBoxUmuteMasterVolume.UseVisualStyleBackColor = true;
-      this.checkBoxUmuteMasterVolume.CheckedChanged += new System.EventHandler(this.buttonApply_Enable);
       // 
       // groupBoxProcesses
       // 
@@ -1411,7 +1396,6 @@ namespace PowerScheduler.Setup
       // 
       this.groupBoxClient.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.groupBoxClient.Controls.Add(this.checkBoxUmuteMasterVolume);
       this.groupBoxClient.Controls.Add(this.checkBoxHomeOnly);
       this.groupBoxClient.Location = new System.Drawing.Point(6, 6);
       this.groupBoxClient.Name = "groupBoxClient";
@@ -1687,8 +1671,10 @@ namespace PowerScheduler.Setup
       this.label7.Location = new System.Drawing.Point(291, 6);
       this.label7.Name = "label7";
       this.label7.Padding = new System.Windows.Forms.Padding(0, 0, 3, 0);
+
       this.label7.Size = new System.Drawing.Size(113, 13);
       this.label7.TabIndex = 6;
+
       this.label7.Text = "o\' clock on weekdays";
       // 
       // flowLayoutPanelPreNoStandbyTime
@@ -1950,7 +1936,6 @@ namespace PowerScheduler.Setup
     private System.Windows.Forms.TabPage tabPageClient;
     private System.Windows.Forms.GroupBox groupBoxClient;
     private System.Windows.Forms.CheckBox checkBoxHomeOnly;
-    private System.Windows.Forms.CheckBox checkBoxUmuteMasterVolume;
     private System.Windows.Forms.TabPage tabPageLegacy;
     private System.Windows.Forms.GroupBox groupBoxLegacy;
     private System.Windows.Forms.Label label4;
