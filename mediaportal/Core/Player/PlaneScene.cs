@@ -955,6 +955,8 @@ namespace MediaPortal.Player
 
     #region IRenderLayer members
 
+    private enum FullHDFormat { None, SBS, TAB };
+
     public void RenderLayer(float timePassed)
     {
       // if (VideoRendererStatistics.VideoState == VideoRendererStatistics.State.VideoPresent)
@@ -982,6 +984,14 @@ namespace MediaPortal.Player
 
           if (GUIGraphicsContext.Render3DMode != GUIGraphicsContext.eRender3DMode.None)
           {
+            FullHDFormat fullHD = FullHDFormat.None;
+
+            if ((double)_sourceRect.Width / _sourceRect.Height >= 2.5) // we have Full HD SBS 
+              fullHD = FullHDFormat.SBS;
+
+            if ((double)_sourceRect.Width / _sourceRect.Height <= 1.5) // we have Full HD TAB
+              fullHD = FullHDFormat.TAB;
+
             if (originalDestination.Width > 512) // full size mode
             {
               switch (GUIGraphicsContext.Render3DModeHalf)
@@ -990,24 +1000,53 @@ namespace MediaPortal.Player
 
                   _sourceRect.X = originalSource.X / 2;
                   _sourceRect.Width = originalSource.Width/2;
+
+                  if (fullHD == FullHDFormat.SBS)
+                  {
+                    _destinationRect.Y -= _destinationRect.Height / 2;
+                    _destinationRect.Height *= 2;
+                  }
                   break;
 
                 case GUIGraphicsContext.eRender3DModeHalf.SBSRight:
 
-                  _sourceRect.X = originalDestination.Width/2 + originalSource.X / 2;
+                  _sourceRect.X = originalDestination.Width / 2 + originalSource.X / 2;
                   _sourceRect.Width = originalSource.Width / 2;
+
+                  if (fullHD == FullHDFormat.SBS)
+                  {
+                    _sourceRect.X *= 2;
+                    _destinationRect.Y -= _destinationRect.Height / 2;
+                    _destinationRect.Height *= 2;
+                  }
                   break;
 
                 case GUIGraphicsContext.eRender3DModeHalf.TABTop:
 
                   _sourceRect.Y = originalSource.Y;
                   _sourceRect.Height = originalSource.Height / 2;
+
+                  if (fullHD == FullHDFormat.TAB)
+                  {                    
+                    _destinationRect.X = originalSource.X;
+                    _destinationRect.Width = originalSource.Width;
+                    _destinationRect.Height = originalSource.Height / 2;
+                    _destinationRect.Y = (_subsRect.Height - _destinationRect.Height) / 2;
+                  }
                   break;
 
                 case GUIGraphicsContext.eRender3DModeHalf.TABBottom:
 
                   _sourceRect.Y = originalSource.Height / 2 + originalSource.Y * 2;
                   _sourceRect.Height = originalSource.Height / 2;
+
+                  if (fullHD == FullHDFormat.TAB)
+                  {
+                    _destinationRect.X = originalSource.X;
+                    _destinationRect.Width = originalSource.Width;
+                    _destinationRect.Height = originalSource.Height / 2;
+                    _destinationRect.Y = (_subsRect.Height - _destinationRect.Height) / 2;
+                  }
                   break;
               }
             }
